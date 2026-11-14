@@ -79,7 +79,7 @@ export default function SetupFlow({
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<Answer | null>(null);
 
-  const update = <K extends keyof Household>(key: K, value: Household[K]) =>
+  const update = <K extends keyof Household,>(key: K, value: Household[K]) =>
     setHousehold((current) => ({ ...current, [key]: value }));
 
   const updateRoommateCount = (value: string) => {
