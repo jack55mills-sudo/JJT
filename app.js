@@ -448,4 +448,12 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && modalRoot.innerHTML) modalRoot.innerHTML = '';
 });
 
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(() => {
+      // The app still works online if service worker registration is unavailable.
+    });
+  });
+}
+
 render();
