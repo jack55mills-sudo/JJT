@@ -143,6 +143,9 @@ as $$
   );
 $$;
 
+revoke all on function public.is_household_member(uuid) from public;
+grant execute on function public.is_household_member(uuid) to authenticated;
+
 alter table public.households enable row level security;
 alter table public.household_members enable row level security;
 alter table public.lease_summaries enable row level security;
