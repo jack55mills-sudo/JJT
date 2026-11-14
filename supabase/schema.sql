@@ -168,7 +168,7 @@ create policy "members can read chore flags" on public.chore_flags for select us
 create policy "members can read shared expenses" on public.shared_expenses for select using (public.is_household_member(household_id));
 create policy "members can read household budgets" on public.household_budgets for select using (public.is_household_member(household_id));
 create policy "members can read house rules" on public.house_rules for select using (public.is_household_member(household_id));
-create policy "members can read house details" on public.house_details for select using (public.is_household_member(household_id) and (sensitivity = 'shared' or exists (select 1 from public.household_members m where m.household_id = household_details.household_id and m.user_id = auth.uid() and m.role = 'owner')));
+create policy "members can read house details" on public.house_details for select using (public.is_household_member(household_id) and (sensitivity = 'shared' or exists (select 1 from public.household_members m where m.household_id = house_details.household_id and m.user_id = auth.uid() and m.role = 'owner')));
 create policy "members can read maintenance records" on public.maintenance_records for select using (public.is_household_member(household_id));
 create policy "members can read checklist" on public.movein_checklist for select using (public.is_household_member(household_id));
 create policy "members can read deposit photos" on public.deposit_photos for select using (public.is_household_member(household_id));
