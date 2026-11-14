@@ -144,7 +144,7 @@ export default function SetupFlow({
   return (
     <main className="setup-page">
       <div className="setup-topbar">
-        <a className="setup-brand" href="#" onClick={(event) => event.preventDefault()}><span>⌂</span> nest.</a>
+        <a className="setup-brand" href="#" onClick={(event) => event.preventDefault()}><span>⌂</span> Goodhouse</a>
         <span className="setup-location"><span /> SAN LUIS OBISPO, CALIFORNIA</span>
         <button className="setup-skip" onClick={onSkip}>Skip setup</button>
       </div>
