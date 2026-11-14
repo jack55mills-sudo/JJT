@@ -4,37 +4,41 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f5f3ed" />
-    <meta name="description" content="A calmer way to share a home." />
+    <meta name="description" content="A first-home co-pilot for leases, move-in costs, and sharing a home." />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icon.svg" />
-    <title>Goodhouse — Willow House</title>
+    <title>Goodhouse — First-home co-pilot</title>
     <link rel="stylesheet" href="styles.css" />
     <script src="app.js" defer></script>
   </head>
   <body>
     <div class="app-frame">
       <aside class="sidebar" aria-label="Main navigation">
-        <a class="brand" href="#" data-view="home" aria-label="Goodhouse home">
+        <a class="brand" href="#" data-view="coach" aria-label="Goodhouse home">
           <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
           <span>goodhouse</span>
         </a>
 
         <div class="house-switcher">
           <span class="eyebrow">YOUR HOUSE</span>
-          <div class="house-name"><span class="house-dot"></span><span>Willow House</span><span class="chevron">⌄</span></div>
-          <div class="roommate-stack" aria-label="4 roommates">
+          <div class="house-name"><span class="house-dot"></span><span id="houseNameLabel">Willow House</span><span class="chevron">⌄</span></div>
+          <div class="roommate-stack" id="roommateStack" aria-label="4 roommates">
             <span class="avatar avatar-sage">A</span><span class="avatar avatar-rose">M</span><span class="avatar avatar-blue">J</span><span class="avatar avatar-gold">S</span>
-            <span class="roommate-count">4 roommates</span>
+            <span class="roommate-count" id="roommateCount">4 roommates</span>
           </div>
         </div>
 
         <nav class="nav-list">
-          <span class="eyebrow nav-label">HOUSE</span>
-          <button class="nav-item active" data-view="home"><span class="nav-icon">⌂</span>Overview</button>
+          <span class="eyebrow nav-label">START HERE</span>
+          <button class="nav-item active" data-view="coach"><span class="nav-icon">✳</span>Home co-pilot</button>
+          <button class="nav-item" data-view="lease"><span class="nav-icon">▤</span>Lease & renter guide</button>
+          <button class="nav-item" data-view="movein"><span class="nav-icon">⌂</span>Move-in roadmap</button>
+          <span class="eyebrow nav-label nav-label-spaced">RUN THE HOUSE</span>
+          <button class="nav-item" data-view="home"><span class="nav-icon">◉</span>Home overview</button>
           <button class="nav-item" data-view="chores"><span class="nav-icon">◷</span>Chore rhythm<span class="nav-badge" id="pendingBadge">2</span></button>
           <button class="nav-item" data-view="rules"><span class="nav-icon">✳</span>Our agreement</button>
-          <span class="eyebrow nav-label nav-label-spaced">EVERYTHING ELSE</span>
+          <span class="eyebrow nav-label nav-label-spaced">HOUSE RECORDS</span>
           <button class="nav-item" data-view="details"><span class="nav-icon">▤</span>House details</button>
           <button class="nav-item" data-view="vault"><span class="nav-icon">▧</span>Deposit vault</button>
           <button class="nav-item" data-view="costs"><span class="nav-icon">＄</span>Shared costs</button>
@@ -42,15 +46,16 @@
 
         <div class="sidebar-bottom">
           <div class="quiet-note"><span class="quiet-spark">✳</span><p>A good week is one where nobody needs to open the app.</p></div>
-          <button class="profile-button"><span class="avatar avatar-sage">A</span><span><strong>Alex Morgan</strong><small>House organizer</small></span><span class="more">···</span></button>
+          <button class="profile-button"><span class="avatar avatar-sage">A</span><span><strong id="profileName">Alex Morgan</strong><small id="profileStatus">Sample household</small></span><span class="more">···</span></button>
         </div>
       </aside>
 
       <main class="main-area">
         <header class="topbar">
-          <div class="breadcrumb"><span>WILLOW HOUSE</span><span class="crumb-slash">/</span><strong id="currentSection">OVERVIEW</strong></div>
+          <div class="breadcrumb"><span id="houseCrumb">WILLOW HOUSE</span><span class="crumb-slash">/</span><strong id="currentSection">OVERVIEW</strong></div>
           <div class="topbar-actions">
-            <span class="demo-pill"><span></span> DEMO HOUSEHOLD</span>
+            <span class="demo-pill"><span></span><span id="connectionLabel">LOCAL PREVIEW</span></span>
+            <button class="button light small" id="accountButton" data-action="open-modal" data-modal="account">Connect house</button>
             <button class="icon-button" aria-label="Notifications" title="Notifications">♧<i></i></button>
             <span class="avatar avatar-sage top-avatar" aria-label="Alex Morgan">A</span>
           </div>
@@ -62,5 +67,6 @@
 
     <div id="modalRoot"></div>
     <div id="toastRoot" class="toast-root" aria-live="polite"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </body>
 </html>

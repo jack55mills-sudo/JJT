@@ -1,4 +1,4 @@
-const CACHE_NAME = 'goodhouse-shell-v2';
+const CACHE_NAME = 'goodhouse-shell-v3';
 const APP_SHELL = [
   './',
   './index.html',
@@ -30,16 +30,21 @@ self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
+  // Household API responses can contain leases, location, expense and access data.
+  // Keep them out of the offline cache; only cache the public app shell.
+  if (url.pathname.startsWith('/api/')) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
         .then((response) => {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          // Store the shell under a fixed URL so invite tokens in query strings
+          // never become cache keys.
+          caches.open(CACHE_NAME).then((cache) => cache.put('./index.html', copy));
           return response;
         })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match('./index.html')))
+        .catch(() => caches.match('./index.html'))
     );
     return;
   }
