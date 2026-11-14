@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "Goodhouse — Roommate Home",
+  "short_name": "Goodhouse",
+  "description": "A calmer way to share a home.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f3ed",
+  "theme_color": "#26382f",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
