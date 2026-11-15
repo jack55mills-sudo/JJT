@@ -21,11 +21,11 @@ const defaultHousehold: Household = {
   moveIn: "2027-01-01",
   leaseStart: "2027-01-01",
   leaseEnd: "2027-12-31",
-  rent: "2550",
+  rent: "5000",
   deposit: "2550",
   roommateCount: "3",
-  roommateNames: ["Alex Morgan", "Roommate 2", "Roommate 3"],
-  utilities: "Electricity and internet",
+  roommateNames: ["Alex Morgan", "John Smith", "Jane Doe"],
+  utilities: "Electricity, gas, and water",
 };
 
 const sources = {
@@ -67,15 +67,20 @@ function SourceLink({ sourceKey }: { sourceKey: SourceKey }) {
 export default function SetupFlow({
   onFinish,
   onSkip,
+  returning = false,
+  initialHousehold,
 }: {
+  returning?: boolean;
+  initialHousehold?: Household | null;
   onFinish: (household: Household) => void;
   onSkip: () => void;
 }) {
   const [step, setStep] = useState(0);
-  const [household, setHousehold] = useState(defaultHousehold);
+  const [household, setHousehold] = useState(initialHousehold ?? defaultHousehold);
   const [fileName, setFileName] = useState("");
   const [sampleReady, setSampleReady] = useState(false);
   const [checked, setChecked] = useState<string[]>([]);
+  const [planStep, setPlanStep] = useState(0);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<Answer | null>(null);
 
@@ -114,7 +119,7 @@ export default function SetupFlow({
       });
     } else if (/lease|rent|notice|guest|utility|utilities/.test(normalized)) {
       setAnswer({
-        text: "The fictional sample lease in this preview lists monthly rent of $2,550, a $2,550 deposit, a January 1–December 31, 2027 term, and a 60-day notice period. These are example terms only; they were not extracted from your file and are not legal guidance.",
+        text: "The fictional sample lease in this preview lists monthly rent of $5,000, a $2,550 deposit, a January 1–December 31, 2027 term, and a 60-day notice period. These are example terms only; they were not extracted from your file and are not legal guidance.",
         sourceKeys: [],
         isSample: true,
       });
@@ -132,12 +137,17 @@ export default function SetupFlow({
   };
 
   const checklistItems = [
-    "Photograph each room and note existing wear",
-    "Confirm utility setup and who pays each bill",
-    "Save landlord and maintenance contact details",
-    "Agree on how roommates will split shared costs",
-    "Add the first rent date to your calendar",
+    {title:"Document your home’s condition", description:"Walk through each room and take dated photos of existing marks or damage. Keep a copy for your records.", next:"In this preview, Records shows sample condition notes. Photo upload is not connected yet."},
+    {title:"Plan your utilities", description:"Confirm which utilities need to be set up, when service starts, and who will pay each bill.", next:`Your setup lists: ${household.utilities || "No utilities added yet"}. You can update this in household setup.`},
+    {title:"Keep important contacts handy", description:"Gather your landlord’s and maintenance contact details, including how to reach them for an urgent repair.", next:"After setup, use Add information in Home Details to save a contact on this browser."},
+    {title:"Agree on shared costs", description:"Talk with your roommates about how rent and shared bills will be divided and how you’ll pay each other.", next:"After setup, add an expense to record agreed shares. Payment tracking stays on this browser in this preview."},
+    {title:"Add your first rent date", description:"Check the actual rent due date in your agreement. The lease start date is not necessarily the date rent is due.", next:"After setup, add rent in Expenses with a due date; it will appear in Calendar."},
   ];
+  const currentPlan = checklistItems[planStep];
+  const advancePlan = (done:boolean) => {
+    if(done) setChecked(current=>current.includes(currentPlan.title)?current:[...current,currentPlan.title]);
+    if(planStep < checklistItems.length-1) setPlanStep(planStep+1); else setStep(6);
+  };
 
   const progress = Math.min(step, 5);
 
@@ -146,7 +156,7 @@ export default function SetupFlow({
       <div className="setup-topbar">
         <a className="setup-brand" href="#" onClick={(event) => event.preventDefault()}><span>⌂</span> Goodhouse</a>
         <span className="setup-location"><span /> SAN LUIS OBISPO, CALIFORNIA</span>
-        <button className="setup-skip" onClick={onSkip}>Skip setup</button>
+        <button className="setup-skip" onClick={onSkip}>{returning ? "Back to dashboard" : "Skip setup"}</button>
       </div>
 
       <div className="setup-wrap">
@@ -167,7 +177,7 @@ export default function SetupFlow({
               <div><span>02</span><b>Walk through a lease</b><small>Try a clearly labeled sample preview.</small></div>
               <div><span>03</span><b>Make a move-in plan</b><small>Leave with a practical checklist.</small></div>
             </div>
-            <div className="setup-welcome-note"><b>Built for San Luis Obispo.</b> Guidance previews link to selected government and court resources. No live AI or data storage is connected.</div>
+            <div className="setup-welcome-note"><b>Built for San Luis Obispo.</b> Guidance previews link to selected government and court resources. No live AI or shared storage is connected.</div>
             <button className="setup-primary" onClick={() => setStep(1)}>Set up my household <span>→</span></button>
             <button className="setup-secondary" onClick={onSkip}>Go straight to the demo dashboard</button>
           </section>
@@ -198,7 +208,7 @@ export default function SetupFlow({
           <section className="setup-card">
             <div className="setup-kicker"><span>✳</span> YOUR HOUSEHOLD</div>
             <h1>Who’s moving in?</h1>
-            <p className="setup-lead">Names are just for this local demo. Nothing is sent or saved.</p>
+            <p className="setup-lead">Setup names stay on this browser once you finish setup. They are not shared with roommates.</p>
             <div className="setup-roommates">
               {household.roommateNames.map((name, index) => (
                 <label className="setup-field" key={index}><span>{index === 0 ? "YOU" : "ROOMMATE " + (index + 1)}</span><input value={name} onChange={(event) => update("roommateNames", household.roommateNames.map((current, nameIndex) => nameIndex === index ? event.target.value : current))} placeholder={index === 0 ? "Your name" : "Roommate name (optional)"} /></label>
@@ -237,7 +247,7 @@ export default function SetupFlow({
             <div className="setup-review-grid">
               <div className="setup-lease-summary">
                 <div className="setup-summary-header"><span className="setup-doc-icon">▤</span><div><b>Sample lease</b><small>Fictional example · not your file</small></div><span className="setup-example-tag">SAMPLE</span></div>
-                <div className="setup-summary-row"><span>Monthly rent</span><b>$2,550</b></div>
+                <div className="setup-summary-row"><span>Monthly rent</span><b>$5,000</b></div>
                 <div className="setup-summary-row"><span>Security deposit</span><b>$2,550</b></div>
                 <div className="setup-summary-row"><span>Lease term</span><b>Jan 1 – Dec 31, 2027</b></div>
                 <div className="setup-summary-row"><span>Notice period listed</span><b>60 days</b></div>
@@ -260,13 +270,14 @@ export default function SetupFlow({
         )}
 
         {step === 5 && (
-          <section className="setup-card">
-            <div className="setup-kicker"><span>✳</span> MOVE-IN PLAN</div>
-            <h1>A few good first steps.</h1>
-            <p className="setup-lead">A practical checklist for your San Luis Obispo move-in. These are suggestions, not legal requirements.</p>
-            <div className="setup-checklist">{checklistItems.map((item, index) => <label className={"setup-check-item" + (checked.includes(item) ? " checked" : "")} key={item}><input type="checkbox" checked={checked.includes(item)} onChange={() => setChecked((current) => current.includes(item) ? current.filter((value) => value !== item) : [...current, item])} /><span className="setup-checkmark">{checked.includes(item) ? "✓" : String(index + 1).padStart(2, "0")}</span><span>{item}</span></label>)}</div>
-            <div className="setup-note"><span>✳</span><p>For city renter resources and safe-housing information, see the <a href={sources.city.url} target="_blank" rel="noreferrer">City of San Luis Obispo’s official page</a>.</p></div>
-            <div className="setup-actions"><button className="setup-back" onClick={() => setStep(4)}>← Back</button><button className="setup-primary" onClick={() => setStep(6)}>Finish setup <span>→</span></button></div>
+          <section className="setup-card" aria-labelledby="plan-title">
+            <div className="setup-kicker"><span>✳</span> MOVE-IN PLAN · {planStep + 1} OF {checklistItems.length}</div>
+            <h1 id="plan-title">{currentPlan.title}.</h1>
+            <p className="setup-lead">{currentPlan.description}</p>
+            <div className="setup-plan-help"><b>How goodhouse can help</b><p>{currentPlan.next}</p></div>
+            <p className="setup-plan-status">{checked.includes(currentPlan.title) ? "Marked done in this session." : "These are suggestions, not legal requirements."} Your plan selections aren’t saved after a refresh.</p>
+            <div className="setup-plan-buttons"><button className="setup-primary" onClick={()=>advancePlan(true)}>Mark done and {planStep===checklistItems.length-1?"finish":"continue"} <span>→</span></button><button className="setup-back" onClick={()=>advancePlan(false)}>Skip this step</button></div>
+            <div className="setup-actions"><button className="setup-back" onClick={()=>planStep>0?setPlanStep(planStep-1):setStep(4)}>← Back</button><button className="setup-back" onClick={()=>setStep(6)}>Skip move-in plan</button></div>
           </section>
         )}
 
@@ -275,10 +286,10 @@ export default function SetupFlow({
             <div className="setup-finish-mark">✓</div>
             <div className="setup-kicker"><span>✳</span> YOUR MOVE-IN PREVIEW</div>
             <h1>You’re ready to<br /><em>make yourself at home.</em></h1>
-            <p className="setup-lead">We’ve brought your setup details into a sample household dashboard. Nothing has been uploaded or saved.</p>
+            <p className="setup-lead">We’ve brought your setup details into a sample household dashboard. Your setup answers will be saved on this browser when you open the dashboard.</p>
             <div className="setup-finish-card"><span className="setup-home-icon">⌂</span><div><b>{household.homeName || "Your household"}</b><small>{household.neighborhood || "San Luis Obispo"} · {household.roommateCount} {Number(household.roommateCount) === 1 ? "roommate" : "roommates"}</small></div><span className="setup-finish-check">✓</span></div>
-            <button className="setup-primary" onClick={() => onFinish(household)}>Open my dashboard <span>→</span></button>
-            <p className="setup-fine-print">Demo only · Answers stay in this browser session · No AI API or backend connected</p>
+            <button className="setup-primary" onClick={() => onFinish(household)}>Open my dashboard <span>→</span></button><button className="setup-secondary setup-edit" onClick={() => setStep(1)}>Edit setup details</button>
+            <p className="setup-fine-print">Demo only · Completed setup is saved in this browser · No shared backend connected</p>
           </section>
         )}
       </div>
